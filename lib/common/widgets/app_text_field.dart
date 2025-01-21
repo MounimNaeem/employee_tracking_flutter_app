@@ -4,11 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-class AppTextField extends StatelessWidget {
+class AppTextField extends StatefulWidget {
   final TextEditingController? controller;
   final String hintText;
   final bool isPassword;
-  final bool isPasswordVisible;
+   bool isPasswordVisible;
   final VoidCallback? onTogglePassword;
   final String? Function(String?)? validator;
   final TextInputType? keyboardType;
@@ -30,7 +30,7 @@ class AppTextField extends StatelessWidget {
   final Color? fillColor;
   final bool autofocus;
 
-  const AppTextField({
+   AppTextField({
     Key? key,
     this.controller,
     required this.hintText,
@@ -59,40 +59,46 @@ class AppTextField extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  State<AppTextField> createState() => _AppTextFieldState();
+}
+
+class _AppTextFieldState extends State<AppTextField> {
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
     return TextFormField(
-      controller: controller,
-      obscureText: isPassword && !isPasswordVisible,
-      style: textStyle ?? bodyMedium,
-      validator: validator,
-      keyboardType: keyboardType,
-      inputFormatters: inputFormatters,
-      maxLines: maxLines,
-      maxLength: maxLength,
-      readOnly: readOnly,
-      onTap: onTap,
-      onChanged: onChanged,
-      focusNode: focusNode,
-      enabled: enabled,
-      textCapitalization: textCapitalization,
-      autofocus: autofocus,
+      controller: widget.controller,
+      obscureText: widget.isPassword && !widget.isPasswordVisible,
+      style: widget.textStyle ?? bodyMedium,
+      validator: widget.validator,
+      keyboardType: widget.keyboardType,
+      inputFormatters: widget.inputFormatters,
+      maxLines: widget.maxLines,
+      maxLength: widget.maxLength,
+      readOnly: widget.readOnly,
+      onTap: widget.onTap,
+      onChanged: widget.onChanged,
+      focusNode: widget.focusNode,
+      enabled: widget.enabled,
+      textCapitalization: widget.textCapitalization,
+      autofocus: widget.autofocus,
       decoration: InputDecoration(
-        hintText: hintText,
-        hintStyle: (hintStyle ?? bodyMedium).copyWith(
+        hintText: widget.hintText,
+        hintStyle: (widget.hintStyle ?? bodyMedium).copyWith(
           color: theme.hintColor.withOpacity(0.5),
         ),
-        errorText: errorText,
+        errorText: widget.errorText,
         filled: true,
-        fillColor: fillColor ?? whiteColor,
-        contentPadding: contentPadding ?? EdgeInsets.symmetric(
-          horizontal: 16.w,
-          vertical: 16.h,
-        ),
+        fillColor: widget.fillColor ?? whiteColor,
+        contentPadding: widget.contentPadding ??
+            EdgeInsets.symmetric(
+              horizontal: 16.w,
+              vertical: 16.h,
+            ),
         isDense: true,
         prefixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
-        prefixIcon: prefix,
+        prefixIcon: widget.prefix,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12.r),
           borderSide: BorderSide.none,
@@ -122,17 +128,21 @@ class AppTextField extends StatelessWidget {
             width: 1.w,
           ),
         ),
-        suffixIcon: isPassword 
+        suffixIcon: widget.isPassword
             ? IconButton(
                 icon: Icon(
-                  isPasswordVisible
+                  widget.isPasswordVisible
                       ? Icons.visibility_outlined
                       : Icons.visibility_off_outlined,
                   color: theme.hintColor,
                 ),
-                onPressed: onTogglePassword,
+                onPressed:() {
+                  setState(() {
+                    widget.isPasswordVisible = !widget.isPasswordVisible;
+                  });
+                },
               )
-            : suffix,
+            : widget.suffix,
       ),
     );
   }

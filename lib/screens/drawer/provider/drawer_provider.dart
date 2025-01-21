@@ -17,6 +17,7 @@ class DrawerProvider extends ChangeNotifier {
 
     try {
       await _authService.logout();
+      await SharedPrefsService().clearUserData();
       // _userModel = null;
 
       if (context.mounted) {

@@ -1,34 +1,25 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:employee_location_tracking_app/utils/static_info/static_info.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:intl/intl.dart';
 
 class EmployeeService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  /// Gets a stream of location updates.
-  /// Gets a stream of location updates.
-  Stream<Position> getLocationStream({LocationSettings? locationSettings}) {
-    return Geolocator.getPositionStream(
-      locationSettings: locationSettings ??
-          const LocationSettings(
-            accuracy: LocationAccuracy.high,
-            distanceFilter:
-                10, // Minimum distance (in meters) to trigger updates
-          ),
-    );
-  }
-
   /// Updates the live location of the user in Firestore.
   Future<void> updateLiveLocation(
-      String userId, Position position, String address) async {
+      String userId, Position position, String address, bool isOnline) async {
+    String formattedDateTime =
+        DateFormat('dd MMM yyyy hh:mm a').format(DateTime.now());
     try {
       await _firestore.collection('liveLocations').doc(userId).set({
+        'userId': userId,
+        'employeeName': StaticInfo.userModel!.firstName,
+        "isActive": isOnline,
         'address': address,
         'latitude': position.latitude,
         'longitude': position.longitude,
-        'timestamp': FieldValue.serverTimestamp(),
-        'accuracy': position.accuracy,
-        'speed': position.speed,
+        'time': formattedDateTime,
       });
     } catch (e) {
       print('Error updating live location: $e');
@@ -84,33 +75,25 @@ class EmployeeService {
           'offlineTime': FieldValue.serverTimestamp(),
         });
       }
-
-     
-     
     } catch (e) {
       print('Error storing location history: $e');
     }
   }
 
-
-Future<void> updateEmployeeActiveStatusInUserDoc(
-      bool isOnline) async {
+  Future<void> updateEmployeeActiveStatusInUserDoc(bool isOnline) async {
     try {
-     
       // Update online status in the user document
       print('Updating online status in user document $isOnline');
       await _firestore
           .collection('users')
           .doc(StaticInfo.userModel!.userUid)
           .update({
-        'isActive': !isOnline,
+        'isActive': isOnline,
       });
     } catch (e) {
       print('Error storing location history: $e');
     }
   }
-
-
 
   /// Get current position with high accuracy
   Future<Position> getCurrentPosition() async {

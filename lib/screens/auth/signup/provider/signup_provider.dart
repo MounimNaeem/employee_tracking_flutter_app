@@ -19,7 +19,7 @@ class SignupNotifier extends ChangeNotifier {
   final phoneController = TextEditingController();
   final passwordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
-  
+
   final FirebaseAuthService _authService = FirebaseAuthService();
 
   String? validatePassword(String? value) {
@@ -57,7 +57,7 @@ class SignupNotifier extends ChangeNotifier {
         email: emailController.text.trim(),
         phone: phoneController.text.trim(),
         userType: UserType.employee,
-        isActive: true,
+        isActive: false,
       );
 
       final result = await _authService.signUp(
@@ -73,10 +73,10 @@ class SignupNotifier extends ChangeNotifier {
           context,
           message: 'Account created successfully!',
         );
-        
+
         // Clear form
         _clearForm();
-        
+
         // Navigate to login screen after short delay
         Future.delayed(const Duration(seconds: 1), () {
           if (!context.mounted) return;

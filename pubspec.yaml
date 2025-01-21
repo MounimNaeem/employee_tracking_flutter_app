@@ -50,6 +50,7 @@ dependencies:
   geocoding: ^2.1.0
   curved_labeled_navigation_bar: ^2.0.5
   flutter_launcher_icons: ^0.14.3
+  intl: ^0.20.1
 
 dev_dependencies:
   flutter_test:

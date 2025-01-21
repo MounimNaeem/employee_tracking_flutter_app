@@ -12,6 +12,8 @@ const Color redColor = Colors.red;
 
 /// Colors not define in theme
 const Color whiteColor = Color(0xffFFFFFF);
+const Color onlineGreenColor = Color(0xff34C759);
+const Color dividerColor = Color(0xffE5E4E4);
 const Color inputFieldBorderColor = Color(0xffE8E8E8);
 const Color blackColor = Color(0xff000000);
 const Color dropdownShadowColor1 = Color(0xff728EAB);

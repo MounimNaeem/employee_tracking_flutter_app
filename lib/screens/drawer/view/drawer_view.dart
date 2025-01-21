@@ -1,4 +1,8 @@
 import 'package:employee_location_tracking_app/screens/drawer/provider/drawer_provider.dart';
+import 'package:employee_location_tracking_app/screens/employee_dashboard/provider/employee_provider.dart';
+import 'package:employee_location_tracking_app/screens/employee_history/view/employee_history_view.dart';
+import 'package:employee_location_tracking_app/screens/update_password/view/update_password_view.dart';
+import 'package:employee_location_tracking_app/utils/enums/enums.dart';
 import 'package:employee_location_tracking_app/utils/static_info/static_info.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -73,32 +77,46 @@ class _DrawerViewState extends ConsumerState<DrawerView> {
                         ),
                       ),
                       8.verticalSpace,
-                      Text(StaticInfo.userModel?.email ?? '',
-                          style: bodySmall.copyWith(
-                              // color: Theme.of(context).primaryColor,
+                      Text(
+                        StaticInfo.userModel?.email ?? '',
+                        style: bodySmall.copyWith(
+                            // color: Theme.of(context).primaryColor,
+                            ),
+                      ),
+                      16.verticalSpace,
+                      DrawerItemWidget(
+                        icon: Icons.lock,
+                        title: 'Update Password',
+                        onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => UpdatePasswordView(),
+                            )),
+                      ),
+                      if (StaticInfo.userModel?.userType ==
+                          UserType.employee) ...[
+                        24.verticalSpace,
+                        DrawerItemWidget(
+                          icon: Icons.history,
+                          title: 'History',
+                          onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => EmployeeHistoryView(
+                                  employeeName:
+                                      StaticInfo.userModel?.fullName ??
+                                          'History',
+                                  userId: StaticInfo.userModel?.userId ?? '',
+                                ),
                               )),
+                        ),
+                      ],
                       Spacer(),
                       // 520.verticalSpace,
-                      GestureDetector(
-                        onTap: () {
-                          notifier.logout(context);
-                        },
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.logout,
-                              color: Theme.of(context).primaryColor,
-                            ),
-                            16.horizontalSpace,
-                            Text(
-                              'Logout',
-                              style: bodyMedium.copyWith(
-                                fontWeight: FontWeight.w600,
-                                // color: Theme.of(context).primaryColor,
-                              ),
-                            ),
-                          ],
-                        ),
+                      DrawerItemWidget(
+                        icon: Icons.logout,
+                        title: 'Logout',
+                        onTap: () => notifier.logout(context),
                       ),
                       16.verticalSpace,
                     ],
@@ -113,6 +131,47 @@ class _DrawerViewState extends ConsumerState<DrawerView> {
             ],
           ),
         )));
+  }
+}
+
+class DrawerItemWidget extends StatelessWidget {
+  const DrawerItemWidget({
+    super.key,
+    required this.onTap,
+    required this.icon,
+    required this.title,
+  });
+
+  final Function() onTap;
+  final IconData icon;
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      // () {
+      //   EmployeeNotifier().disposeData();
+      //   notifier.logout(context);
+      // },
+      child: Row(
+        children: [
+          Icon(
+            icon,
+            color: Theme.of(context).primaryColor,
+            size: 20,
+          ),
+          10.horizontalSpace,
+          Text(
+            title,
+            style: bodyLarge.copyWith(
+              fontWeight: FontWeight.w600,
+              // color: Theme.of(context).primaryColor,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 

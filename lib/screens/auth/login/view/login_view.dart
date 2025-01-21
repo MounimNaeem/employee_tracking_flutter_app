@@ -1,5 +1,6 @@
 import 'package:employee_location_tracking_app/screens/auth/login/provider/login_provider.dart';
 import 'package:employee_location_tracking_app/screens/auth/signup/view/signup_view.dart';
+import 'package:employee_location_tracking_app/screens/forgot_password/view/forgot_password_view.dart';
 import 'package:employee_location_tracking_app/utils/theme/font_styles/light_font_style/light_font_style.dart';
 import 'package:employee_location_tracking_app/utils/theme/light_base_theme.dart';
 import 'package:flutter/material.dart';
@@ -96,6 +97,26 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       }
                       return null;
                     },
+                  ),
+                  17.verticalSpace,
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ForgotPasswordView(),
+                            ),
+                          );
+                        },
+                        child: Text(
+                          'Forgot Password?',
+                          style: bodyMedium.copyWith(
+                            color: theme.primaryColor,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        )),
                   ),
                   56.verticalSpace,
                   SizedBox(

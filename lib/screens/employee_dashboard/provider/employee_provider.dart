@@ -16,7 +16,7 @@ class EmployeeNotifier extends ChangeNotifier {
   final _locationService = EmployeeService();
   GoogleMapController? mapController;
   Timer? _locationTimer;
-  StreamSubscription<Position>? _locationSubscription;
+  // StreamSubscription<Position>? _locationSubscription;
 
   bool isOnline = false;
   // bool get isOnline => _isOnline;
@@ -37,16 +37,17 @@ class EmployeeNotifier extends ChangeNotifier {
   Future<void> toggleOnlineStatus() async {
     try {
       if (isOnline) {
+        isOnline = !isOnline;
         await endShift();
       } else {
+        isOnline = !isOnline;
         await startShift();
       }
+
       await _locationService.updateEmployeeActiveStatusInUserDoc(isOnline);
 
-      isOnline = !isOnline;
-
       await SharedPrefsService().setisUserOnline(isOnline);
-      print('isONlin onlin onlin $isOnline');
+
       notifyListeners();
     } catch (e) {
       rethrow;
@@ -94,7 +95,7 @@ class EmployeeNotifier extends ChangeNotifier {
   Future<void> endShift() async {
     await _updateLocation();
     _stopPeriodicLocationTracking();
-    _locationSubscription?.cancel();
+    // _locationSubscription?.cancel();
     notifyListeners();
   }
 
@@ -102,6 +103,7 @@ class EmployeeNotifier extends ChangeNotifier {
   void _startPeriodicLocationTracking() {
     _locationTimer?.cancel();
     _locationTimer = Timer.periodic(const Duration(seconds: 20), (_) {
+      print('timer running');
       _updateLocation();
     });
   }
@@ -125,7 +127,8 @@ class EmployeeNotifier extends ChangeNotifier {
       );
 
       // Update location in database
-      await _locationService.updateLiveLocation(userId, position, address);
+      await _locationService.updateLiveLocation(
+          userId, position, address, isOnline);
       await _locationService.storeLocationHistory(
           userId, position, address, isOnline);
 
@@ -202,10 +205,11 @@ class EmployeeNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
-  @override
-  void dispose() {
+  
+  void disposeData() {
+    print('dispose called');
     _stopPeriodicLocationTracking();
-    _locationSubscription?.cancel();
+    // _locationSubscription?.cancel();
     mapController?.dispose();
     super.dispose();
   }

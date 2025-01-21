@@ -1,3 +1,5 @@
+import 'package:employee_location_tracking_app/screens/admin_dashboard/widgets/list_row_widget.dart';
+import 'package:employee_location_tracking_app/screens/employees_tracking/models/employee_tracking_model.dart';
 import 'package:employee_location_tracking_app/utils/theme/font_styles/light_font_style/light_font_style.dart';
 import 'package:employee_location_tracking_app/utils/theme/light_base_theme.dart';
 import 'package:flutter/material.dart';
@@ -19,7 +21,7 @@ class AppUtils {
           ),
         ),
         backgroundColor: isError ? redColor : primaryColor,
-        duration: const Duration(seconds: 2),
+        duration: const Duration(seconds: 4),
         behavior: SnackBarBehavior.floating,
         margin: EdgeInsets.all(16.r),
         shape: RoundedRectangleBorder(
@@ -121,6 +123,74 @@ class AppUtils {
                               ),
                             ],
                           ),
+                          16.verticalSpace,
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        ) ??
+        false;
+  }
+
+  static Future<bool> showLocationDetailDialog({
+    required BuildContext context,
+    required EmployeeTrackingModel employee,
+    String? iconPath,
+  }) async {
+    final theme = Theme.of(context);
+    return await showDialog<bool>(
+          context: context,
+          barrierDismissible: true,
+          builder: (BuildContext context) {
+            return Center(
+              child: Wrap(
+                children: [
+                  Dialog(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 32.w),
+                      child: Column(
+                        children: [
+                          16.verticalSpace,
+                          if (iconPath != null)
+                            SvgPicture.asset(
+                              iconPath,
+                              color: theme.primaryColor,
+                              width: 30.w,
+                              // height: 50.h,
+                            ),
+                          18.verticalSpace,
+
+                          Text(
+                            employee.employeeName ?? '',
+                            style: headingLarge.copyWith(
+                              color: theme.primaryColor,
+                            ),
+                          ),
+                          10.verticalSpace,
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Location: ',
+                                style: bodyMedium.copyWith(
+                                    fontWeight: FontWeight.w600),
+                              ),
+                              Expanded(
+                                child: Text(
+                                  employee.address ?? '',
+                                  style: bodyMedium,
+                                ),
+                              ),
+                            ],
+                          ),
+                          // ListRowWidget(titie: 'Location', body: employee.address ?? ''),
+                          5.verticalSpace,
+                          ListRowWidget(
+                              titie: 'Last Updated', body: employee.time ?? ''),
                           16.verticalSpace,
                         ],
                       ),
