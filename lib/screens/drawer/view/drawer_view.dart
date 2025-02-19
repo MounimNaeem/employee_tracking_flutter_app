@@ -1,3 +1,4 @@
+import 'package:employee_location_tracking_app/screens/admin_dashboard/models/employee_list_model.dart';
 import 'package:employee_location_tracking_app/screens/drawer/provider/drawer_provider.dart';
 import 'package:employee_location_tracking_app/screens/employee_dashboard/provider/employee_provider.dart';
 import 'package:employee_location_tracking_app/screens/employee_history/view/employee_history_view.dart';
@@ -97,19 +98,37 @@ class _DrawerViewState extends ConsumerState<DrawerView> {
                           UserType.employee) ...[
                         24.verticalSpace,
                         DrawerItemWidget(
-                          icon: Icons.history,
-                          title: 'History',
-                          onTap: () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => EmployeeHistoryView(
-                                  employeeName:
-                                      StaticInfo.userModel?.fullName ??
-                                          'History',
+                            icon: Icons.history,
+                            title: 'History',
+                            onTap: () {
+                              EmployeeListModel employee = EmployeeListModel(
+                                  id: StaticInfo.userModel?.userId ?? '',
+                                  firstName: StaticInfo.userModel?.firstName ??
+                                      '',
+                                  lastName: StaticInfo.userModel?.lastName ??
+                                      '',
+                                  phone: StaticInfo.userModel?.phone ?? '',
+                                  email: StaticInfo.userModel?.email ?? '',
+                                  isActive: true,
+                                  profileImage: StaticInfo.userModel?.profileImage ??
+                                      '',
+                                  userUid: StaticInfo.userModel?.userUid ?? '',
                                   userId: StaticInfo.userModel?.userId ?? '',
-                                ),
-                              )),
-                        ),
+                                  userType: StaticInfo.userModel?.userType ??
+                                      UserType.admin);
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => EmployeeHistoryView(
+                                      employee: employee,
+                                      employeeName:
+                                          StaticInfo.userModel?.fullName ??
+                                              'History',
+                                      userId:
+                                          StaticInfo.userModel?.userId ?? '',
+                                    ),
+                                  ));
+                            }),
                       ],
                       Spacer(),
                       // 520.verticalSpace,

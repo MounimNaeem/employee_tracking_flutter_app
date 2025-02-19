@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:employee_location_tracking_app/services/firebase_notification/provider/send_notification_provider.dart';
 import 'package:employee_location_tracking_app/utils/static_info/static_info.dart';
+import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 
@@ -27,8 +29,8 @@ class EmployeeService {
   }
 
   /// Stores the user's location in the location history collection.
-  Future<void> storeLocationHistory(
-      String userId, Position position, String address, bool isOnline) async {
+  Future<void> storeLocationHistory(String userId, Position position,
+      String address, bool isOnline, BuildContext cntxt) async {
     try {
       final String todayDate = DateTime.now().toIso8601String().split('T')[0];
 
@@ -75,12 +77,20 @@ class EmployeeService {
           'offlineTime': FieldValue.serverTimestamp(),
         });
       }
+
+      SendNotificationProvider().sendPushNotification(
+        body:
+            '${StaticInfo.userModel?.firstName}\'s location has been updated. Check the latest details in the app',
+        title: '📌 Employee Location Updated',
+        cntxt: cntxt,
+      );
     } catch (e) {
       print('Error storing location history: $e');
     }
   }
 
-  Future<void> updateEmployeeActiveStatusInUserDoc(bool isOnline) async {
+  Future<void> updateEmployeeActiveStatusInUserDoc(
+      bool isOnline, BuildContext cntxt) async {
     try {
       // Update online status in the user document
       print('Updating online status in user document $isOnline');
@@ -90,6 +100,15 @@ class EmployeeService {
           .update({
         'isActive': isOnline,
       });
+      SendNotificationProvider().sendPushNotification(
+        body: isOnline
+            ? '${StaticInfo.userModel?.firstName} is now online and ready to work.'
+            : '${StaticInfo.userModel?.firstName} has gone offline and is unavailable',
+        title: isOnline
+            ? '🟢 Employee is Now Online'
+            : '🔴 Employee is Now Offline',
+        cntxt: cntxt,
+      );
     } catch (e) {
       print('Error storing location history: $e');
     }
@@ -100,5 +119,44 @@ class EmployeeService {
     return await Geolocator.getCurrentPosition(
       desiredAccuracy: LocationAccuracy.high,
     );
+  }
+
+  /// clear history before 45 days from firebase
+  Future<void> cleanHistory(String userId) async {
+    try {
+      // Get the cutoff date
+      final String cutoffDate = DateTime.now()
+          .subtract(Duration(days: 45))
+          .toIso8601String()
+          .split('T')[0];
+
+      print('Cleaning history before: $cutoffDate for user: $userId');
+
+      // Reference to the user's "dates" sub-collection
+      final datesRef = FirebaseFirestore.instance
+          .collection('histories')
+          .doc(userId)
+          .collection('dates');
+
+      // Get all documents in the 'dates' sub-collection
+      final querySnapshot = await datesRef.get();
+      print('querySnapshot.docs.length ${querySnapshot.docs.length}');
+      // Iterate through each document in the 'dates' collection
+      for (var doc in querySnapshot.docs) {
+        // Extract the date from the document ID (which is in YYYY-MM-DD format)
+        String date = doc.id;
+        print('Checking date: $date');
+        // Compare document date with cutoff date
+        if (date.compareTo(cutoffDate) < 0) {
+          // If the document's date is older than the cutoff date, delete it
+          await doc.reference.delete();
+          print('Deleted history for date: $date');
+        }
+      }
+
+      print('History cleanup complete!');
+    } catch (e) {
+      print('Error cleaning history: $e');
+    }
   }
 }

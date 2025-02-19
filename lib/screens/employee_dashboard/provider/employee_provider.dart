@@ -12,10 +12,11 @@ import 'package:permission_handler/permission_handler.dart';
 
 final employeeProvider = ChangeNotifierProvider((ref) => EmployeeNotifier());
 
-class EmployeeNotifier extends ChangeNotifier {
+class EmployeeNotifier extends ChangeNotifier with WidgetsBindingObserver {
   final _locationService = EmployeeService();
   GoogleMapController? mapController;
   Timer? _locationTimer;
+  // bool isAppInForeground = true; // Track app state
   // StreamSubscription<Position>? _locationSubscription;
 
   bool isOnline = false;
@@ -34,17 +35,20 @@ class EmployeeNotifier extends ChangeNotifier {
     getCurrentLocation();
   }
 
-  Future<void> toggleOnlineStatus() async {
+  
+
+  Future<void> toggleOnlineStatus(BuildContext cntxt) async {
     try {
       if (isOnline) {
         isOnline = !isOnline;
-        await endShift();
+        await endShift(cntxt);
       } else {
         isOnline = !isOnline;
-        await startShift();
+        await startShift(cntxt);
       }
 
-      await _locationService.updateEmployeeActiveStatusInUserDoc(isOnline);
+      await _locationService.updateEmployeeActiveStatusInUserDoc(
+          isOnline, cntxt);
 
       await SharedPrefsService().setisUserOnline(isOnline);
 
@@ -76,7 +80,7 @@ class EmployeeNotifier extends ChangeNotifier {
   }
 
   /// Start the employee shift and location tracking
-  Future<void> startShift() async {
+  Future<void> startShift(BuildContext cntxt) async {
     // if (_isShiftActive) return;
 
     final hasPermission = await checkAndRequestPermissions();
@@ -85,26 +89,26 @@ class EmployeeNotifier extends ChangeNotifier {
     }
 
     notifyListeners();
-
+    await _locationService.cleanHistory(StaticInfo.userModel!.userId ?? '');
     // Start periodic location tracking (every 30 minutes)
-    await _updateLocation(); // Initial update
-    _startPeriodicLocationTracking();
+    await updateLocation(cntxt); // Initial update
+    startPeriodicLocationTracking(cntxt);
   }
 
   /// Stop the employee shift and location tracking
-  Future<void> endShift() async {
-    await _updateLocation();
+  Future<void> endShift(BuildContext cntxt) async {
+    await updateLocation(cntxt);
     _stopPeriodicLocationTracking();
     // _locationSubscription?.cancel();
     notifyListeners();
   }
 
   /// Start periodic location tracking (every 30 minutes)
-  void _startPeriodicLocationTracking() {
+  void startPeriodicLocationTracking(BuildContext cntxt) {
     _locationTimer?.cancel();
-    _locationTimer = Timer.periodic(const Duration(seconds: 20), (_) {
+    _locationTimer = Timer.periodic(const Duration(minutes: 1), (_) {
       print('timer running');
-      _updateLocation();
+      updateLocation(cntxt);
     });
   }
 
@@ -115,7 +119,7 @@ class EmployeeNotifier extends ChangeNotifier {
   }
 
   /// Update location and store in history
-  Future<void> _updateLocation() async {
+  Future<void> updateLocation(BuildContext cntxt) async {
     try {
       final position = await _locationService.getCurrentPosition();
       final userId = StaticInfo.userModel?.userId ?? '-1';
@@ -130,7 +134,7 @@ class EmployeeNotifier extends ChangeNotifier {
       await _locationService.updateLiveLocation(
           userId, position, address, isOnline);
       await _locationService.storeLocationHistory(
-          userId, position, address, isOnline);
+          userId, position, address, isOnline, cntxt);
 
       // Update Google Map marker and camera position
       final latLng = LatLng(position.latitude, position.longitude);
@@ -205,7 +209,6 @@ class EmployeeNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
-  
   void disposeData() {
     print('dispose called');
     _stopPeriodicLocationTracking();
@@ -214,3 +217,4 @@ class EmployeeNotifier extends ChangeNotifier {
     super.dispose();
   }
 }
+///AIzaSyCCWqVXt2kSZZzyqeAZu4jqvfQ-gjxdcn8

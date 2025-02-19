@@ -3,6 +3,7 @@ import 'package:employee_location_tracking_app/common/widgets/app_bar/app_bar_wi
 import 'package:employee_location_tracking_app/screens/drawer/view/drawer_view.dart';
 import 'package:employee_location_tracking_app/screens/employee_dashboard/provider/employee_provider.dart';
 import 'package:employee_location_tracking_app/screens/employee_dashboard/widgets/status_widget.dart';
+import 'package:employee_location_tracking_app/services/firebase_notification/provider/send_notification_provider.dart';
 import 'package:employee_location_tracking_app/services/shared_prefs_service.dart';
 import 'package:employee_location_tracking_app/utils/app_utils/app_utils.dart';
 import 'package:employee_location_tracking_app/utils/static_info/static_info.dart';
@@ -25,6 +26,9 @@ class EmployeeDashboard extends ConsumerStatefulWidget {
 class _EmployeeDashboardState extends ConsumerState<EmployeeDashboard> {
   final provider = ChangeNotifierProvider(
     (ref) => EmployeeNotifier(),
+  );
+  final notificationProvider = ChangeNotifierProvider(
+    (ref) => SendNotificationProvider(),
   );
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -101,6 +105,17 @@ class _EmployeeDashboardState extends ConsumerState<EmployeeDashboard> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
                       children: [
+                        ElevatedButton(
+                          child: Text('test notification'),
+                          onPressed: () {
+                            ref.read(notificationProvider).sendPushNotification(
+                                  body:
+                                      '${StaticInfo.userModel?.firstName} has gone offline and is unavailable',
+                                  title: '🟢 Employee is Now Offline',
+                                  cntxt: context,
+                                );
+                          },
+                        ),
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
@@ -136,12 +151,10 @@ class _EmployeeDashboardState extends ConsumerState<EmployeeDashboard> {
                             ),
                             action: (controller) async {
                               controller.loading(); //starts loading animation
-                              await shiftNotifier.toggleOnlineStatus();
+                              await shiftNotifier.toggleOnlineStatus(context);
                               // await Future.delayed(const Duration(seconds: 2));
                               controller.success(); //starts success animation
                               controller.reset(); //reset slider
-
-                              
                             },
                             child: shiftNotifier.isOnline
                                 ? Text('Swipe to go Offline')
@@ -156,6 +169,5 @@ class _EmployeeDashboardState extends ConsumerState<EmployeeDashboard> {
               ],
             ),
     );
- 
   }
 }

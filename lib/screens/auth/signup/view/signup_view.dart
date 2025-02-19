@@ -134,6 +134,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                           ),
                   ),
                 ),
+               
                 16.verticalSpace,
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,

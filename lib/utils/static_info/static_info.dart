@@ -2,4 +2,5 @@ import 'package:employee_location_tracking_app/screens/auth/signup/models/user_m
 
 class StaticInfo {
   static UserModel? userModel;
+  static String? fcmToken;
 }

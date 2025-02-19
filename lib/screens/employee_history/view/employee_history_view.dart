@@ -1,5 +1,7 @@
 import 'package:employee_location_tracking_app/common/widgets/app_bar/app_bar_widget.dart';
+import 'package:employee_location_tracking_app/screens/admin_dashboard/models/employee_list_model.dart';
 import 'package:employee_location_tracking_app/screens/admin_dashboard/widgets/list_row_widget.dart';
+import 'package:employee_location_tracking_app/screens/edit_emplooye_profile/view/edit_employee_profile_view.dart';
 import 'package:employee_location_tracking_app/screens/employee_history/provider/employee_history_provider.dart';
 import 'package:employee_location_tracking_app/utils/theme/font_styles/light_font_style/light_font_style.dart';
 import 'package:employee_location_tracking_app/utils/theme/light_base_theme.dart';
@@ -11,8 +13,12 @@ import 'package:flutter_svg/svg.dart';
 class EmployeeHistoryView extends ConsumerStatefulWidget {
   final String userId;
   final String employeeName;
+  final EmployeeListModel employee;
   const EmployeeHistoryView(
-      {Key? key, required this.userId, required this.employeeName})
+      {Key? key,
+      required this.userId,
+      required this.employeeName,
+      required this.employee})
       : super(key: key);
 
   @override
@@ -41,11 +47,31 @@ class _EmployeeHistoryViewState extends ConsumerState<EmployeeHistoryView> {
     return Scaffold(
       extendBodyBehindAppBar: false,
       appBar: CustomAppBar(
-        color: Colors.white,
-        userName: widget.employeeName,
-        showBackIcon: true,
-        // scaffoldKey: _scaffoldKey,
-      ),
+          color: Colors.white,
+          userName: widget.employeeName,
+          showBackIcon: true,
+          actionWidget: <Widget>[
+            IconButton(
+              icon: Icon(Icons.edit_outlined),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => EditEmployeeProfileView(
+                      employee: widget.employee,
+                    ),
+                  ),
+                );
+              },
+            ),
+            // IconButton(
+            //   icon: Icon(Icons.delete_outline_outlined),
+            //   onPressed: () {},
+            // )
+          ]
+
+          // scaffoldKey: _scaffoldKey,
+          ),
       backgroundColor: theme.scaffoldBackgroundColor,
       body: Container(
         decoration: BoxDecoration(

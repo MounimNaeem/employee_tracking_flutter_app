@@ -7,6 +7,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback? onMenuPressed;
   final GlobalKey<ScaffoldState>? scaffoldKey;
   final bool showBackIcon;
+  final List<Widget>? actionWidget;
   final Color? color;
 
   const CustomAppBar({
@@ -14,6 +15,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     required this.userName,
     this.showBackIcon = false,
     this.onMenuPressed,
+    this.actionWidget,
     this.scaffoldKey,
     this.color,
   }) : super(key: key);
@@ -56,6 +58,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                 }
               },
             ),
+            actions: actionWidget != null ? actionWidget : [],
     );
   }
 

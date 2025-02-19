@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:employee_location_tracking_app/screens/auth/signup/models/user_model.dart';
 import 'package:employee_location_tracking_app/services/shared_prefs_service.dart';
+import 'package:employee_location_tracking_app/utils/enums/enums.dart';
+import 'package:employee_location_tracking_app/utils/static_info/static_info.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class LoginResult {
@@ -49,7 +51,9 @@ class LoginService {
 
       // Store user data locally
       await _prefs.setUserData(userData);
-
+      if (userData.userType == UserType.admin) {
+        saveAdminFCMToken();
+      }
       return LoginResult(
         success: true,
         userData: userData,
@@ -64,6 +68,26 @@ class LoginService {
         success: false,
         error: 'An unexpected error occurred. Please try again.',
       );
+    }
+  }
+
+  Future<void> saveAdminFCMToken() async {
+    try {
+      // Get the FCM Token
+
+      if (StaticInfo.fcmToken != null) {
+        // Store it in Firestore under "admin_tokens" collection
+        await _firestore.collection("admin_tokens").doc("admin").set({
+          "fcm_token": StaticInfo.fcmToken,
+          "updated_at": FieldValue.serverTimestamp(),
+        });
+
+        print("✅ Admin FCM Token saved successfully: ${StaticInfo.fcmToken}");
+      } else {
+        print("⚠️ Failed to get FCM Token");
+      }
+    } catch (e) {
+      print("❌ Error saving FCM Token: $e");
     }
   }
 

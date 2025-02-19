@@ -74,6 +74,7 @@ class _AdminDashboardViewState extends ConsumerState<AdminDashboardView> {
                 : adminProvider.error != null
                     ? Center(child: Text(adminProvider.error!))
                     : ListView.builder(
+                        physics: const BouncingScrollPhysics(),
                         padding: EdgeInsets.symmetric(horizontal: 16.w),
                         itemCount: adminProvider.employeeList.length,
                         itemBuilder: (context, index) {
@@ -84,6 +85,7 @@ class _AdminDashboardViewState extends ConsumerState<AdminDashboardView> {
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => EmployeeHistoryView(
+                                    employee: user,
                                     userId: user.userId ?? '-1',
                                     employeeName: user.firstName ?? 'History',
                                   ),
