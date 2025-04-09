@@ -64,6 +64,7 @@ class _SplashViewState extends ConsumerState<SplashView>
   void moveToNextScreen() {
     Future.delayed(const Duration(seconds: 0), () async {
       UserModel? userModel = await SharedPrefsService().getUserData();
+      StaticInfo.getIsAdminBackgroundServiceOn = await SharedPrefsService().getIsAdminBackgroundServiceOn();
       if (userModel != null) {
         StaticInfo.userModel = userModel;
         print('user user user   ${userModel.userType}');

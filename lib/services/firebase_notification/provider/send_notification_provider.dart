@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:googleapis_auth/auth_io.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:flutter/services.dart' show rootBundle;
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
@@ -32,13 +33,24 @@ class SendNotificationProvider extends ChangeNotifier {
   }
 
   /// Load service account JSON for authentication
-  Future<Map<String, dynamic>> _loadServiceAccountJson(
-      BuildContext cntxt) async {
+  // Future<Map<String, dynamic>> _loadServiceAccountJson(
+  //     BuildContext cntxt) async {
+  //   try {
+  //     // In a real app, you'd need to securely store and load this file
+  //     // This is a simplified example
+  //     final data =
+  //         await DefaultAssetBundle.of(cntxt).loadString(serviceAccountPath);
+  //     return json.decode(data);
+  //   } catch (e) {
+  //     print('Error loading service account: $e');
+  //     rethrow;
+  //   }
+  // }
+
+  Future<Map<String, dynamic>> _loadServiceAccountJson() async {
     try {
-      // In a real app, you'd need to securely store and load this file
-      // This is a simplified example
-      final data =
-          await DefaultAssetBundle.of(cntxt).loadString(serviceAccountPath);
+      print('loading service account 888888888888888888888888888888888');
+      final data = await rootBundle.loadString(serviceAccountPath);
       return json.decode(data);
     } catch (e) {
       print('Error loading service account: $e');
@@ -47,9 +59,9 @@ class SendNotificationProvider extends ChangeNotifier {
   }
 
   /// Get access token for Firebase Cloud Messaging API
-  Future<String> _getAccessToken(BuildContext context) async {
+  Future<String> _getAccessToken() async {
     try {
-      final serviceAccountJson = await _loadServiceAccountJson(context);
+      final serviceAccountJson = await _loadServiceAccountJson();
       final serviceAccountCredentials =
           ServiceAccountCredentials.fromJson(serviceAccountJson);
       final client = await clientViaServiceAccount(serviceAccountCredentials,
@@ -66,7 +78,7 @@ class SendNotificationProvider extends ChangeNotifier {
   Future<void> sendPushNotification(
       {required String title,
       required String body,
-      required BuildContext cntxt}) async {
+      }) async {
     try {
       String? adminToken = await getAdminFCMToken();
 
@@ -75,7 +87,7 @@ class SendNotificationProvider extends ChangeNotifier {
         return;
       }
 
-      final accessToken = await _getAccessToken(cntxt);
+      final accessToken = await _getAccessToken();
       final fcmUrl =
           'https://fcm.googleapis.com/v1/projects/$projectId/messages:send';
 

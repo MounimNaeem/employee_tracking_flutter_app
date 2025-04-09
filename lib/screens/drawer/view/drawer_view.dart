@@ -3,6 +3,9 @@ import 'package:employee_location_tracking_app/screens/drawer/provider/drawer_pr
 import 'package:employee_location_tracking_app/screens/employee_dashboard/provider/employee_provider.dart';
 import 'package:employee_location_tracking_app/screens/employee_history/view/employee_history_view.dart';
 import 'package:employee_location_tracking_app/screens/update_password/view/update_password_view.dart';
+import 'package:employee_location_tracking_app/services/admin_background_service/admin_background_service.dart';
+import 'package:employee_location_tracking_app/services/background_service_manager/backgroung_service_manager.dart';
+import 'package:employee_location_tracking_app/services/shared_prefs_service.dart';
 import 'package:employee_location_tracking_app/utils/enums/enums.dart';
 import 'package:employee_location_tracking_app/utils/static_info/static_info.dart';
 import 'package:flutter/material.dart';
@@ -103,15 +106,15 @@ class _DrawerViewState extends ConsumerState<DrawerView> {
                             onTap: () {
                               EmployeeListModel employee = EmployeeListModel(
                                   id: StaticInfo.userModel?.userId ?? '',
-                                  firstName: StaticInfo.userModel?.firstName ??
-                                      '',
-                                  lastName: StaticInfo.userModel?.lastName ??
-                                      '',
+                                  firstName:
+                                      StaticInfo.userModel?.firstName ?? '',
+                                  lastName:
+                                      StaticInfo.userModel?.lastName ?? '',
                                   phone: StaticInfo.userModel?.phone ?? '',
                                   email: StaticInfo.userModel?.email ?? '',
                                   isActive: true,
-                                  profileImage: StaticInfo.userModel?.profileImage ??
-                                      '',
+                                  profileImage:
+                                      StaticInfo.userModel?.profileImage ?? '',
                                   userUid: StaticInfo.userModel?.userUid ?? '',
                                   userId: StaticInfo.userModel?.userId ?? '',
                                   userType: StaticInfo.userModel?.userType ??
@@ -129,6 +132,34 @@ class _DrawerViewState extends ConsumerState<DrawerView> {
                                     ),
                                   ));
                             }),
+                      ],
+                      if (StaticInfo.userModel?.userType == UserType.admin) ...[
+                        24.verticalSpace,
+                        ToggleDrawerItemWidget(
+                          icon: Icons.notifications,
+                          title: "Notification",
+                          initialValue:
+                              StaticInfo.getIsAdminBackgroundServiceOn ?? false,
+                          onToggle: (bool isOn) async {
+                            // Perform your tasks based on toggle state
+                            if (isOn) {
+                              print('88888888888 $isOn');
+                              await BackgroundServicesManager
+                                  .startAdminService();
+                              SharedPrefsService()
+                                  .setIsAdminBackgroundServiceOn(isOn);
+                              // Task when toggle is turned on
+                            } else {
+                              print('999999999999999999 $isOn');
+                              await BackgroundServicesManager
+                                  .stopAdminService();
+                              SharedPrefsService()
+                                  .setIsAdminBackgroundServiceOn(isOn);
+                              // Task when toggle is turned off
+                            }
+                          },
+                          onTap: () {},
+                        ),
                       ],
                       Spacer(),
                       // 520.verticalSpace,
@@ -194,6 +225,85 @@ class DrawerItemWidget extends StatelessWidget {
   }
 }
 
-// class CustomDrawer extends StatelessWidget {
+class ToggleDrawerItemWidget extends StatefulWidget {
+  const ToggleDrawerItemWidget({
+    Key? key,
+    required this.onTap,
+    required this.icon,
+    required this.title,
+    required this.onToggle,
+    this.initialValue = false,
+  }) : super(key: key);
 
-// }
+  final VoidCallback onTap;
+  final IconData icon;
+  final String title;
+  final ValueChanged<bool> onToggle;
+  final bool initialValue;
+
+  @override
+  _ToggleDrawerItemWidgetState createState() => _ToggleDrawerItemWidgetState();
+}
+
+class _ToggleDrawerItemWidgetState extends State<ToggleDrawerItemWidget> {
+  late bool _isToggled;
+
+  @override
+  initState() {
+    super.initState();
+    _isToggled = widget.initialValue;
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) {
+        // initialToggledValue();
+      },
+    );
+  }
+
+  Future<void> initialToggledValue() async {
+    _isToggled = await SharedPrefsService().getIsAdminBackgroundServiceOn();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return GestureDetector(
+      onTap: widget.onTap,
+      child: Row(
+        // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Icon(
+                widget.icon,
+                color: theme.primaryColor,
+                size: 20,
+              ),
+              const SizedBox(width: 10),
+              Text(
+                widget.title,
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          Spacer(),
+          Switch(
+            activeColor: theme.primaryColor,
+            activeTrackColor: theme.scaffoldBackgroundColor,
+            inactiveTrackColor: theme.scaffoldBackgroundColor,
+            inactiveThumbColor: theme.colorScheme.secondary,
+            value: _isToggled,
+            onChanged: (bool value) {
+              setState(() {
+                _isToggled = value;
+              });
+              // Call the provided onToggle callback with the new value.
+              widget.onToggle(value);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}

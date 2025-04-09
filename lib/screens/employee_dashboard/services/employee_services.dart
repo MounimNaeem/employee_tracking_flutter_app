@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:employee_location_tracking_app/screens/auth/signup/models/user_model.dart';
 import 'package:employee_location_tracking_app/services/firebase_notification/provider/send_notification_provider.dart';
 import 'package:employee_location_tracking_app/utils/static_info/static_info.dart';
-import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 
@@ -10,27 +10,37 @@ class EmployeeService {
 
   /// Updates the live location of the user in Firestore.
   Future<void> updateLiveLocation(
-      String userId, Position position, String address, bool isOnline) async {
+      {required String userId,
+      required Position position,
+      required String address,
+      required bool isOnline,
+      UserModel? userModel}) async {
     String formattedDateTime =
         DateFormat('dd MMM yyyy hh:mm a').format(DateTime.now());
+        print('update live location  ${userModel?.firstName}');
     try {
-      await _firestore.collection('liveLocations').doc(userId).set({
-        'userId': userId,
-        'employeeName': StaticInfo.userModel!.firstName,
-        "isActive": isOnline,
-        'address': address,
-        'latitude': position.latitude,
-        'longitude': position.longitude,
-        'time': formattedDateTime,
-      });
+    await _firestore.collection('liveLocations').doc(userId).set({
+      'userId': userId,
+      'employeeName': userModel?.firstName ?? '',
+      "isActive": isOnline,
+      'address': address,
+      'latitude': position.latitude,
+      'longitude': position.longitude,
+      'time': formattedDateTime,
+    });
     } catch (e) {
       print('Error updating live location: $e');
     }
   }
 
   /// Stores the user's location in the location history collection.
-  Future<void> storeLocationHistory(String userId, Position position,
-      String address, bool isOnline, BuildContext cntxt) async {
+  Future<void> storeLocationHistory(
+    String userId,
+    Position position,
+    String address,
+    bool isOnline,
+    String userName,
+  ) async {
     try {
       final String todayDate = DateTime.now().toIso8601String().split('T')[0];
 
@@ -80,17 +90,15 @@ class EmployeeService {
 
       SendNotificationProvider().sendPushNotification(
         body:
-            '${StaticInfo.userModel?.firstName}\'s location has been updated. Check the latest details in the app',
+            '$userName\'s location has been updated. Check the latest details in the app',
         title: '📌 Employee Location Updated',
-        cntxt: cntxt,
       );
     } catch (e) {
       print('Error storing location history: $e');
     }
   }
 
-  Future<void> updateEmployeeActiveStatusInUserDoc(
-      bool isOnline, BuildContext cntxt) async {
+  Future<void> updateEmployeeActiveStatusInUserDoc(bool isOnline) async {
     try {
       // Update online status in the user document
       print('Updating online status in user document $isOnline');
@@ -107,7 +115,6 @@ class EmployeeService {
         title: isOnline
             ? '🟢 Employee is Now Online'
             : '🔴 Employee is Now Offline',
-        cntxt: cntxt,
       );
     } catch (e) {
       print('Error storing location history: $e');

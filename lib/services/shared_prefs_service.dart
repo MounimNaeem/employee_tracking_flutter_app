@@ -57,4 +57,15 @@ class SharedPrefsService {
     final prefs = await _prefs;
     return prefs.getBool(AppConstants.keyIsUserOnline) ?? false;
   }
+
+
+   Future<void> setIsAdminBackgroundServiceOn(bool isActive) async {
+    final prefs = await _prefs;
+    await prefs.setBool(AppConstants.keyIsAdminBackgroundServiceOn, isActive);
+  }
+
+  Future<bool> getIsAdminBackgroundServiceOn() async {
+    final prefs = await _prefs;
+    return prefs.getBool(AppConstants.keyIsAdminBackgroundServiceOn) ?? false;
+  }
 }
